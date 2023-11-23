@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  www:
+    build:
+      context: ./project
+      dockerfile: Dockerfile
+    volumes:
+      - "./project:/var/www/html" # sync the current dir on local machine to the dir of container
+    ports:
+      - 81:80
+      - 444:443 # for future ssl traffic
+
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: my_secret_password
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: db_user_pass
+    ports:
+      - "6033:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    restart: always
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - 8081:80
+volumes:
+  dbdata:
